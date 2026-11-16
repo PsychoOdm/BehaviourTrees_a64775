@@ -6,6 +6,7 @@ public class RobberBehaviour : MonoBehaviour
     public GameObject diamond;
     public GameObject van;
     public GameObject backdoor;
+    public GameObject frontdoor;
     UnityEngine.AI.NavMeshAgent agent;
 
     public enum ActionState { IDLE, WORKING};
@@ -21,11 +22,16 @@ public class RobberBehaviour : MonoBehaviour
         Sequence steal = new Sequence("Steal Something");
         Leaf goToDiamond = new Leaf("Go to Diamond", GoToDiamond);
         Leaf goToBackDoor = new Leaf("Go to BackDoor", GoToBackDoor);
+        Leaf goToFrontDoor = new Leaf("Go to FrontDoor", GoToFrontDoor); 
         Leaf goToVan = new Leaf("Go To Van", GoToVan);
+        Selector opendoor = new Selector("Open Door");
 
-        steal.AddChild(goToBackDoor);
+        opendoor.AddChild(goToFrontDoor); 
+        opendoor.AddChild(goToBackDoor);
+         
+
+        steal.AddChild(opendoor); 
         steal.AddChild(goToDiamond);
-        steal.AddChild(goToBackDoor);
         steal.AddChild(goToVan);
         tree.AddChild(steal);
 
@@ -44,6 +50,11 @@ public class RobberBehaviour : MonoBehaviour
         return GoToLocation(backdoor.transform.position);
     }
 
+     public Node.Status GoToFrontDoor()
+    {
+        return GoToLocation(frontdoor.transform.position);
+    }
+
     public Node.Status GoToVan()
     {
         return GoToLocation(van.transform.position);
@@ -58,7 +69,7 @@ public class RobberBehaviour : MonoBehaviour
             agent.SetDestination(destination);
             state = ActionState.WORKING;
         }
-        else if (Vector3.Distance(agent.pathEndPosition, destination) >=2)
+        else if (Vector3.Distance(agent.pathEndPosition, destination) >= 2)
         {
             state = ActionState.IDLE;
             return Node.Status.FAILURE;
